@@ -1,0 +1,380 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Rust als sichere Sprache für systemnahe und parallele Software</title><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" name="viewport"><link href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/reveal.css" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/theme/solarized.css" id="theme"><link href="solarized-dark.css" rel="stylesheet"><script>var link = document.createElement( 'link' );
+link.rel = 'stylesheet';
+link.type = 'text/css';
+link.href = window.location.search.match( /print-pdf/gi ) ? "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/print/pdf.css" : "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/print/paper.css";
+document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if lt IE 9]><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/html5shiv.js"></script><![endif]--></head><body><div class="reveal"><div class="slides"><section class="title" data-state="title"><h1>Rust als sichere Sprache für systemnahe und parallele Software</h1></section><section><table class="tableblock frame-all grid-all" style="width:100%"><colgroup><col style="width:50%"><col style="width:50%"></colgroup><thead><tr><th class="tableblock halign-left valign-top">Stefan Lankes</th><th class="tableblock halign-left valign-top">Jens Breitbart</th></tr><tbody><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="image"><img src="images/stl.png" alt="stl" width="100"></span></p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><span class="image"><img src="images/jbreitbart.png" alt="jbreitbart" width="100"></span></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/stlankes">github.com/stlankes</a></p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/jbreitbart">github.com/jbreitbart</a></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://rwth-os.github.io/eduOS-rs/">eduOS-rs</a>,  <a href="http://www.hermitcore.org">HermitCore</a></p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://www.jensbreitbart.de/">jensbreitbart.de</a></p></td></tr><tr><td class="tableblock halign-left valign-top"><p class="tableblock">System Software @ RWTH</p></td><td class="tableblock halign-left valign-top"><p class="tableblock"><em>Here for fun and no profit</em></p></td></tr></table></section>
+<section id="hinweise_zum_vortrag"><h2>Hinweise zum Vortrag</h2><div class="ulist"><ul><li><p>Folien: <a href="https://stlankes.github.io/rust_parallel2018/" class="bare">https://stlankes.github.io/rust_parallel2018/</a></p></li><li><p>Beispiele: <a href="https://github.com/stlankes/rust_parallel2018" class="bare">https://github.com/stlankes/rust_parallel2018</a></p></li><li><p>Einstieg: <a href="https://www.rust-lang.org" class="bare">https://www.rust-lang.org</a></p></li><li><p>Playground: <a href="https://play.rust-lang.org" class="bare">https://play.rust-lang.org</a></p></li><li><p>Tutorial: <a href="https://rustbyexample.com" class="bare">https://rustbyexample.com</a></p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="bash language-bash">curl https://sh.rustup.rs -sSf | sh</code></pre></div></div></section>
+<section><section id="was_ist_rust"><h2>Was ist Rust?</h2><div class="paragraph"><p>Rust ist eine (relativ) neue Programmiersprache für systemnahe Software</p></div><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">fn main() {
+    // Die Statements werden ausgeführt sobald
+    // das compilierte Binary gestartet wird.
+
+    // Ausgabe auf stdout
+    println!("Hello para//el 2018!");
+}</code></pre></div></div><div class="paragraph"><p>Bekannt u.a. für den Einsatz in Firefox</p></div><div class="paragraph"><p>&#8658; Rust Code läuft somit auf Millionen von Rechnern</p></div><aside class="notes"><div class="paragraph"><p>Frage ans Publikum:
+* Wer kennt Rust?
+* Wer hat schonmal Code in Rust geschrieben?
+* Wessen Code hat auch compiliert?
+C-Ähnliche Syntax
+Nicht nur Einsatz in Firefox:
+* game engines
+* operating systems
+* file systems</p></div></aside></section><section id="woher_kommt_rust"><h2>Woher kommt Rust?</h2><div class="imageblock" style=""><img src="images/rust.png" alt="rust" width="150"></div>
+<div class="ulist"><ul><li><p>Rust ist ein open-source (MIT + Apache) Projekt</p></li><li><p>Wird aktuell primär von Mozilla Research gesponsort</p></li><li><p>Die Weiterentwicklung selbst wird allerdings stark durch die Community getrieben</p></li></ul></div>
+<aside class="notes"></aside></section><section id="vorteile_von_rust"><h2>Vorteile von Rust</h2><div class="ulist"><ul><li><p>C/C++ ähnliche Performance</p><div class="ulist"><ul><li><p><a href="http://benchmarksgame.alioth.debian.org/u64q/compare.php?lang=rust&amp;lang2=gpp">Link zu Vergleichsmessungen</a></p></li></ul></div></li><li><p>Compilerbasierte Überprüfungen welche z.B.</p><div class="ulist"><ul><li><p>Speichersicherheit (ohne Garbage Collection) garantieren</p></li><li><p>Data Races verhindern</p></li></ul></div></li></ul></div>
+<div class="paragraph"><p>&#8658; <em>Falscher</em> Code compiliert nicht</p></div>
+<aside class="notes"></aside></section><section id="safety_vs_speed"><h2>Safety vs Speed</h2><div class="paragraph"><div class="title">URL: <a href="http://thoughtram.io/rust-and-nickel/#/11" class="bare">http://thoughtram.io/rust-and-nickel/#/11</a></div><p><span class="image"><img src="images/comparsion.png" alt="jhh" width="600"></span></p></div>
+<aside class="notes"></aside></section><section id="einfache_integration_von_c"><h2>Einfache Integration von C</h2><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">#[repr(C)]
+struct RustObject {
+    number: c_int
+}
+
+#[link(name = "libprinto")]
+extern {
+    fn c_print_object(object: *mut RustObject) -&gt; c_int;
+}
+
+fn main() {
+    let mut rust_object = /* TODO */;
+
+    unsafe { c_print_object(&amp;mut *rust_object); }
+}</code></pre></div></div>
+<aside class="notes"></aside></section></section>
+<section><section id="ownership_borrowing"><h2>Ownership &amp; Borrowing</h2><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="C++ language-C++">std::vector&lt;std::string&gt;* x = nullptr;
+
+{
+	std::vector&lt;std::string&gt; z;
+
+	z.push_back("Hello para//el 2018!");
+	x = &amp;z;
+}
+
+std::cout &lt;&lt; (*x)[0] &lt;&lt; std::endl;</code></pre></div></div><aside class="notes"><div class="paragraph"><p>In der Realität verteilt über viele Files + if das wieder was in den Vector pushed.</p></div></aside><div class="ulist"><ul><li><p>Ist dieses C++-Beispiel problematisch?</p></li></ul></div></section><section id="erlaubt_rust_solche_referenzen"><h2>Erlaubt Rust solche Referenzen?</h2><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let x;
+
+{
+	let z = vec!("Hello para//el 2018!");
+
+	x = &amp;z;
+}
+
+println!("{}", x[0]);</code></pre></div></div>
+<aside class="notes"></aside></section><section id="fragen_wir_den_compiler"><h2>Fragen wir den Compiler</h2><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">error[E0597]: `z` does not live long enough
+  --&gt; src/main.rs:9:8
+   |
+9  |         x = &amp;z;
+   |              ^ borrowed value does not live long enough
+10 |     }
+   |     - `z` dropped here while still borrowed
+...
+13 | }
+   | - borrowed value needs to live until here</code></pre></div></div>
+<aside class="notes"></aside></section><section id="ownership"><h2>Ownership</h2><div class="ulist"><ul><li><p>Variablen werden an <strong>einen</strong> Besitzer (<em>Owner</em>) gebunden</p></li><li><p>Wird der Scope des Besitzers verlassen, wird die Variable freigeben</p></li><li><p>Yehuda Katz: <em>Ownership is the right to destroy</em></p></li></ul></div>
+<aside class="notes"></aside></section><section id="borrowing"><h2>Borrowing</h2><div class="ulist"><ul><li><p>Mit Hilfe von Referenzen kann der Besitzt ausgeliehen werden</p></li><li><p>Der Besitz geht automatisch wieder zurück, wenn die Referenz nicht mehr existiert</p></li></ul></div>
+<div class="listingblock"><div class="title">Sind die geschweiften Klammern nötig?</div><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let mut v = vec!("Hello para//el 2018!");
+
+{
+	let x = &amp;mut v;
+	// Do something with x...
+}
+
+println!("{}", v[0]);</code></pre></div></div>
+<aside class="notes"></aside></section></section>
+<section><section id="ein_einfaches_beispiel_pi"><h2>Ein einfaches Beispiel: Pi</h2><div class="imageblock" style=""><img src="images/pi.png" alt="pi" width="600"></div><aside class="notes"></aside></section><section id="pi_berechnung_in_c"><h2>Pi-Berechnung in C</h2><div class="ulist"><ul><li><p>Für <strong>num_steps</strong> Rechtecke die Höhen bestimmen</p></li><li><p>Höhen Aufsummieren, zum Schluß mit der Breite multiplizieren</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="C++ language-C++">const int num_steps = 100000000;
+
+double sum = 0.0;
+double step = 1.0 / (double)num_steps;
+
+for (int i = 0; i &lt; num_steps; i++) {
+    double x = (i + 0.5) * step;
+    sum += 4.0 / (1.0 + x * x);
+}
+
+std::cout &lt;&lt; "PI = " &lt;&lt;  sum * step &lt;&lt; std::endl;</code></pre></div></div>
+<aside class="notes"></aside></section><section id="pi_berechnung_in_rust"><h2>Pi-Berechnung in Rust</h2><div class="ulist"><ul><li><p>Äquivalenter Code in Rust</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">const NUM_STEPS: u64 = 100000000;
+let step = 1.0 / NUM_STEPS as f64;
+let mut sum = 0.0;
+
+for i  in 0..NUM_STEPS {
+    let x = (i as f64 + 0.5) * step;
+    sum += 4.0 / (1.0 + x * x);
+}
+
+println!("Pi: {}", sum * step);</code></pre></div></div>
+<aside class="notes"></aside></section></section>
+<section><section id="parallele_berechnung"><h2>Parallele Berechnung</h2><div class="ulist"><ul><li><p>Verteilung der Rechtecke über die Threads</p></li><li><p>Hier: Wettlaufsituation um die Variable <strong>sum</strong></p></li></ul></div><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="C++ language-C++">const double step = 1.0 / NUM_STEPS;
+double sum = 0.0;
+
+std::thread t([&amp;](int start, int end){
+
+    for (int i = start; i &lt; end; i++) {
+    	double x = (i + 0.5) * step;
+    	sum += 4.0 / (1.0 + x * x);
+    }
+
+}, (NUM_STEPS / nthreads) *  tid
+ , (NUM_STEPS / nthreads) * (tid + 1));</code></pre></div></div><aside class="notes"></aside></section><section id="berechnung_mit_rust"><h2>Berechnung mit Rust</h2><div class="ulist"><ul><li><p>Versuch einer Wettlaufsituation in Rust</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let step = 1.0 / NUM_STEPS as f64;
+let mut sum = 0.0 as f64;
+
+let threads: Vec&lt;_&gt; = (0..nthreads)
+    .map(|tid| {
+        thread::spawn(|| {
+            let start = (NUM_STEPS / nthreads) * tid;
+            let end = (NUM_STEPS / nthreads) * (tid+1);
+
+            for i in start..end {
+                let x = (i as f64 + 0.5) * step;
+                sum += 4.0 / (1.0 + x * x);
+            }
+        })
+    }).collect();
+
+for t in threads {
+    t.join().unwrap();
+}</code></pre></div></div>
+<aside class="notes"></aside></section><section id="compiler_schlgt_alarm"><h2>Compiler schlägt Alarm</h2><div class="ulist"><ul><li><p>Ausgeliehene Objekte könnten das Original überleben</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">   |
+37 | thread::spawn(|| {
+   |               ^^ may outlive borrowed value `**step`
+...
+42 |    let x = (i as f64 + 0.5) * step;
+   |                               ---- `**step` is borrowed
+help: to force the closure to take ownership of `**step`
+   |
+37 |    thread::spawn(move || {
+   |                  ^^^^^^^</code></pre></div></div>
+<div class="paragraph"><p>&#8658; Ein std::thread darf nur auf Variablen zugreifen die er besitzt oder welche <em>static lifetime</em> haben.</p></div>
+<aside class="notes"></aside></section><section id="berechnung_mit_rust_2"><h2>Berechnung mit Rust</h2><div class="ulist"><ul><li><p>Übergabe der Ownership (Compiler Vorschlag)</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let step = 1.0 / NUM_STEPS as f64;
+let mut sum = 0.0 as f64;
+
+let threads: Vec&lt;_&gt; = (0..nthreads)
+    .map(|tid| {
+        thread::spawn(move || 	{
+            let start = (NUM_STEPS / nthreads) * tid;
+            let end = (NUM_STEPS / nthreads) * (tid+1);
+
+            for i  in start..end {
+                let x = (i as f64 + 0.5) * step;
+                sum += 4.0 / (1.0 + x * x);
+            }
+        })
+    }).collect();</code></pre></div></div>
+<aside class="notes"></aside></section><section id="compiler_schlgt_alarm_2"><h2>Compiler schlägt Alarm</h2><div class="ulist"><ul><li><p>Objekte werden als unveränderliche übergeben</p></li><li><p>Wettlaufsituation wird verhindert</p></li><li><p>Aber keine Lösung für die Pi-Berechnung</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">error: cannot assign to immutable captured outer variable
+   |
+43 |   sum += 4.0 / (1.0 + x * x);
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^</code></pre></div></div>
+<aside class="notes"></aside></section></section>
+<section><section id="schutz_statischer_elemente"><h2>Schutz statischer Elemente</h2><div class="ulist"><ul><li><p>Statische Element können gelesen werden</p></li><li><p><strong>unsafe</strong>-Blöcke für Änderungen zwingend nötig</p><div class="ulist"><ul><li><p>Entwickler wird sich den Gefahren bewußt</p></li></ul></div></li></ul></div><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">static readonly_number: u64 = 42;
+static mut counter: u64 = 0;
+
+pub fn init() {
+    let i = readonly_number;
+
+    unsafe {
+        counter = i;
+    }
+}</code></pre></div></div><aside class="notes"></aside></section><section id="gemeinsame_variablen"><h2>Gemeinsame Variablen</h2><div class="ulist"><ul><li><p>Heap-Allokation ermöglicht längere Lebenszeit</p><div class="ulist"><ul><li><p>Speicherschutz über <em>reference counting</em></p></li><li><p><code>std::{Rc|Arc}&lt;T&gt;</code> alloziert <code>T</code> auf dem Heap</p></li><li><p><code>std::Arc</code> is thread-sicher</p></li></ul></div></li><li><p><em>scoped Threads</em> aus dem Crossbeam crate ähnlich dem OpenMP Thread Modell</p></li></ul></div>
+<div class="paragraph"><p>&#8658; Bis jetzt aber nur unveränderliche Variablen</p></div>
+<aside class="notes"></aside></section><section id="zugriffsschutz_mit_mutexen_rwlock"><h2>Zugriffsschutz mit Mutexen / RWLock</h2><div class="ulist"><ul><li><p>Rust-Mutexe nehmen zuschützendes Objekt auf</p></li><li><p><strong>lock</strong>-Methode liefert Objekt zum Zugriff zurück</p></li><li><p>Automatische Freigabe nach Zerstörung des Objekts</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">static readonly_number: u64 = 42;
+static counter: Mutex&lt;u64&gt; = Mutex::new(0);
+
+pub fn init() {
+    let guard = counter.lock().unwrap();
+    guard = readonly_number;
+}</code></pre></div></div>
+<div class="ulist"><ul><li><p>RWLock bietet ein ähnliches Interface.</p></li></ul></div>
+<aside class="notes"></aside></section><section id="atomare_variablen"><h2>Atomare Variablen</h2><div class="ulist"><ul><li><p>Atomare Variablen (<code>std::sync::atomic::*</code>)</p><div class="ulist"><ul><li><p>Schwierig zu benutzen</p></li><li><p>Folgt dem C11 Speichermodell mit Acquire/Release Semantik</p></li></ul></div></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let reference_count: AtomicUsize = 0;
+reference_count.fetch_add(1, Ordering::Relaxed);</code></pre></div></div>
+<div class="paragraph"><p>&#8658; Der trait <code>std::marker::Sync</code> muß für gemeinsame veränderliche Variablen implementiert werden</p></div>
+<aside class="notes"></aside></section></section>
+<section><section id="parallele_berechnung_2"><h2>Parallele Berechnung</h2><div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let sum = Arc::new(Mutex::new(0.0 as f64));
+
+let threads: Vec&lt;_&gt; = (0..nthreads).map(|tid| {
+    let sum = sum.clone();
+
+    thread::spawn(move || {
+        let start = (NUM_STEPS / nthreads) * tid;
+        let end = (NUM_STEPS / nthreads) * (tid+1);
+        for i in start..end {
+            let x = (i as f64 + 0.5) * step;
+            *sum.lock().unwrap() += 4.0 / (1.0 + x * x);
+        }
+    })
+}).collect();</code></pre></div></div><aside class="notes"></aside></section><section id="berechnung_mit_teilergebnissen"><h2>Berechnung mit Teilergebnissen</h2><div class="ulist"><ul><li><p>Der Mutex serialisiert die Berechnung</p></li><li><p>Idee: Teilergebnisse berechnen &amp; zusammenführen</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let step = 1.0 / NUM_STEPS as f64;
+let sum = 0.0 as f64;
+
+let threads: Vec&lt;_&gt; = (0..nthreads)
+	.map(|tid| {
+		thread::spawn(move || {
+			let mut partial_sum = 0 as f64;
+			let start = (NUM_STEPS/nthreads)*tid;
+			let end = (NUM_STEPS/nthreads)*(tid+1);
+			for i  in start..end {
+				let x = (i as f64 + 0.5) * step;
+				partial_sum += 4.0 / (1.0 + x * x);
+			}
+			partial_sum
+		})}).collect();</code></pre></div></div>
+<aside class="notes"></aside></section><section id="berechnung_mit_teilergebnissen_2"><h2>Berechnung mit Teilergebnissen</h2><div class="ulist"><ul><li><p>Der Mutex serialisiert die Berechnung</p></li><li><p>Idee: Teilergebnisse berechnen &amp; zusammenführen</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">for t in threads {
+	sum += t.join().unwrap();
+}</code></pre></div></div>
+<aside class="notes"></aside></section><section id="berechnung_mit_kanlen"><h2>Berechnung mit Kanälen</h2><div class="ulist"><ul><li><p>Ergebnisse durch Kanäle zusammenführen</p><div class="ulist"><ul><li><p>Analogie zu <strong>Communicating Sequential Processes</strong> (CSP) und <strong>Coroutines</strong></p></li></ul></div></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">fn term(start: u64, end: u64) -&gt; f64
+{
+    let step = 1.0 / NUM_STEPS as f64;
+    let mut sum = 0.0;
+
+    for i in start..end {
+        let x = (i as f64 + 0.5) * step;
+        sum += 4.0 / (1.0 + x * x);
+    }
+
+    sum
+}</code></pre></div></div>
+<aside class="notes"></aside></section><section id="berechnung_mit_kanlen_2"><h2>Berechnung mit Kanälen</h2><div class="ulist"><ul><li><p>Teilergebnisse berechnen und versenden</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let (tx, rx) = mpsc::channel();
+
+for id in 0..nthreads {
+    let thread_tx = tx.clone();
+    let start = (NUM_STEPS / nthreads as u64) * id;
+    let end = (NUM_STEPS / nthreads as u64) * (id+1);
+
+    thread::spawn(move || {
+        let partial_sum = term(start, end);
+        thread_tx.send(partial_sum).unwrap();
+    });
+};</code></pre></div></div>
+<aside class="notes"></aside></section><section id="berechnung_mit_kanlen_3"><h2>Berechnung mit Kanälen</h2><div class="ulist"><ul><li><p>Ergebnisse empfangen und aufaddieren</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let mut sum = 0.0;
+
+for _ in 0..nthreads {
+    sum = sum + rx.recv().unwrap();
+}</code></pre></div></div>
+<div class="ulist"><ul><li><p>Diese Lösung skaliert wie gewünscht</p></li><li><p>Wie sieht es mit Lastbalanzierung aus?</p></li></ul></div>
+<aside class="notes"></aside></section></section>
+<section><section id="rayon_parallelism_in_rust"><h2>Rayon: Parallelism in Rust</h2><div class="ulist"><ul><li><p><a href="https://github.com/rayon-rs/rayon" class="bare">https://github.com/rayon-rs/rayon</a></p></li><li><p>Unterstützt parallele Berechungen auf Basis von Task-Parallelität und <em>Work Stealing</em></p><div class="ulist"><ul><li><p>Ähnlich zu Cilk (daher auch der Name)</p></li></ul></div></li><li><p>Biete aber auch Daten-Parallelität über Iteratoren</p></li></ul></div><aside class="notes"><div class="paragraph"><p>rayon == Kunstseide
+silk == Seide
+Eingesetzt in firefox
+Automatische Lastbalanzierung</p></div></aside></section><section id="iteratoren_in_rust"><h2>Iteratoren in Rust</h2><div class="ulist"><ul><li><p>Serielle Pi-Berechnung mit Hilfe von Iteratoren</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let step = 1.0 / NUM_STEPS as f64;
+
+let sum: f64 = (0..NUM_STEPS).into_iter()
+    .map(|i| {
+        let x = (i as f64 + 0.5) * step;
+        4.0 / (1.0 + x * x)
+    }).sum();
+
+println!("Pi: {}", sum * (1.0 / NUM_STEPS as f64));</code></pre></div></div>
+<aside class="notes"></aside></section><section id="pi_berechnung_mit_rayon"><h2>Pi-Berechnung mit Rayon</h2><div class="ulist"><ul><li><p>Parallele Pi-Berechnung mit Rayon</p></li><li><p>Lohnt sich nur bei größeren Aufgaben</p></li></ul></div>
+<div class="listingblock"><div class="content"><pre class="highlight"><code data-noescape class="Rust language-Rust">let step = 1.0 / NUM_STEPS as f64;
+
+let sum: f64 = (0..NUM_STEPS).into_par_iter()
+    .map(|i| {
+        let x = (i as f64 + 0.5) * step;
+        4.0 / (1.0 + x * x)
+    }).sum();
+
+println!("Pi: {}", sum * (1.0 / NUM_STEPS as f64));</code></pre></div></div>
+<aside class="notes"><div class="paragraph"><p>Actually things aren&#8217;t that bad</p></div></aside></section></section>
+<section><section id="das_laplace_problem"><h2>Das Laplace-Problem</h2><div class="ulist"><ul><li><p>Wärme-Verteilung innerhalb einer Platte</p></li><li><p>Gelöst mit <em>Jacobi Over Relaxation</em> (JOR)</p></li></ul></div><div class="imageblock" style=""><img src="images/laplace.png" alt="laplace" width="600"></div></section><section id="lsung_mit_hilfe_von_tasks"><h2>Lösung mit Hilfe von Tasks</h2><div class="imageblock" style=""><img src="images/laplace_task.png" alt="laplace task" width="600"></div></section><section id="lsung_durch_eine_for_schleife"><h2>Lösung durch eine // For-Schleife</h2><div class="imageblock" style=""><img src="images/laplace_for.png" alt="laplace for" width="600"></div></section></section>
+<section id="zusammenfassung"><h2>Zusammenfassung</h2><div class="ulist"><ul><li><p>Ownership / Borrowing ist für einen <em>old school</em> Entwickler gewönnungsbedürftig</p></li><li><p><em>Fearless concurency</em></p><div class="ulist"><ul><li><p>Der Compiler verhindert <em>race conditions</em></p></li><li><p>std hat Threads, Mutex, RW Lock und Arc</p></li><li><p>Rayon und Crossbeam vereinfachen viele Aufgaben</p></li></ul></div></li></ul></div>
+<aside class="notes"></aside></section></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/head.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/js/reveal.js"></script><script>// See https://github.com/hakimel/reveal.js#configuration for a full list of configuration options
+Reveal.initialize({
+  // Display controls in the bottom right corner
+  controls: true,
+  // Display a presentation progress bar
+  progress: true,
+  // Set a per-slide timing for speaker notes, null means none
+  defaultTiming: null,
+  // Display the page number of the current slide
+  slideNumber: true,
+  // Push each slide change to the browser history
+  history: true,
+  // Enable keyboard shortcuts for navigation
+  keyboard: true,
+  // Enable the slide overview mode
+  overview: true,
+  // Vertical centering of slides
+  center: true,
+  // Enables touch navigation on devices with touch input
+  touch: true,
+  // Loop the presentation
+  loop: false,
+  // Change the presentation direction to be RTL
+  rtl: false,
+  // Randomizes the order of slides each time the presentation loads
+  shuffle: false,
+  // Turns fragments on and off globally
+  fragments: true,
+  // Flags if the presentation is running in an embedded mode,
+  // i.e. contained within a limited portion of the screen
+  embedded: false,
+  // Flags if we should show a help overlay when the questionmark
+  // key is pressed
+  help: true,
+  // Flags if speaker notes should be visible to all viewers
+  showNotes: false,
+  // Global override for autolaying embedded media (video/audio/iframe)
+  // - null: Media will only autoplay if data-autoplay is present
+  // - true: All media will autoplay, regardless of individual setting
+  // - false: No media will autoplay, regardless of individual setting
+  autoPlayMedia: null,
+  // Number of milliseconds between automatically proceeding to the
+  // next slide, disabled when set to 0, this value can be overwritten
+  // by using a data-autoslide attribute on your slides
+  autoSlide: 0,
+  // Stop auto-sliding after user input
+  autoSlideStoppable: true,
+  // Enable slide navigation via mouse wheel
+  mouseWheel: false,
+  // Hides the address bar on mobile devices
+  hideAddressBar: true,
+  // Opens links in an iframe preview overlay
+  previewLinks: false,
+  // Theme (e.g., beige, black, league, night, serif, simple, sky, solarized, white)
+  // NOTE setting the theme in the config no longer works in reveal.js 3.x
+  //theme: Reveal.getQueryHash().theme || 'solarized',
+  // Transition style (e.g., none, fade, slide, convex, concave, zoom)
+  transition: Reveal.getQueryHash().transition || 'slide',
+  // Transition speed (e.g., default, fast, slow)
+  transitionSpeed: 'default',
+  // Transition style for full page slide backgrounds (e.g., none, fade, slide, convex, concave, zoom)
+  backgroundTransition: 'fade',
+  // Number of slides away from the current that are visible
+  viewDistance: 3,
+  // Parallax background image (e.g., "'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg'")
+  parallaxBackgroundImage: '',
+  // Parallax background size in CSS syntax (e.g., "2100px 900px")
+  parallaxBackgroundSize: '',
+
+  // The "normal" size of the presentation, aspect ratio will be preserved
+  // when the presentation is scaled to fit different resolutions. Can be
+  // specified using percentage units.
+  width: 960,
+  height: 700,
+
+  // Factor of the display size that should remain empty around the content
+  margin: 0.1,
+
+  // Bounds for smallest/largest possible scale to apply to content
+  minScale: 0.2,
+  maxScale: 1.5,
+
+  // Optional libraries used to extend on reveal.js
+  dependencies: [
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/zoom-js/zoom.js', async: true },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/plugin/notes/notes.js', async: true }
+  ]
+});</script></body></html>
