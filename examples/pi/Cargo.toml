@@ -1,0 +1,16 @@
+[package]
+name = "pi"
+version = "0.1.0"
+authors = ["Stefan Lankes <slankes@eonerc.rwth-aachen.de>"]
+license = "MIT"
+
+[dependencies]
+rayon = "0.9"
+
+# The release profile, used for `cargo build --release`.
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+debug-assertions = false

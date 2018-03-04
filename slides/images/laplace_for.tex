@@ -1,0 +1,40 @@
+\documentclass[convert={density=300,size=1080x800,outext=.png}]{standalone}
+\usepackage{units}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,fit,automata,chains,patterns,shadows,shapes,shapes.multipart,arrows,spy}
+\usepackage{pgfplots}
+\usetikzlibrary{pgfplots.units}
+\usepackage{pgfplotstable}
+
+\begin{document}
+\begin{tikzpicture}[spy using outlines={connect spies,magnification=6}]
+  \pgfplotstableread{laplace.dat}\laplace
+  \begin{axis}[%
+     title=Laplace equation; 7500 x 7500 matrix,
+     use units,
+     legend style={legend pos=north east},
+     legend pos=north west,
+     minor tick num=1,
+     scaled ticks=false,
+     xmode=log,
+     log basis x=2,
+     xtick={1,2,4,8,10},
+     xticklabels={1,2,4,8,10},
+     xlabel=Number of threads,
+     y unit=s,
+     ylabel=Time,
+     ymin=0,ymax=350
+  ]
+  %\addplot[color=red,mark=*] table[x={0}, y expr=\thisrowno{1}] {\laplace};
+  %\addlegendentry{Rayon with boundary check}
+  %\addplot[color=blue,mark=triangle*] table[x={0},y expr=\thisrowno{2}] {\laplace};
+  %\addlegendentry{Rayon without boundary check}
+	\addplot[color=red,mark=*] table[x={0},y expr=\thisrowno{6}] {\laplace};
+  \addlegendentry{Rust with boundary check}
+	\addplot[color=blue,mark=triangle*] table[x={0},y expr=\thisrowno{7}] {\laplace};
+  \addlegendentry{Rust without boundary check}
+  \addplot[color=green,mark=+] table[x={0},y expr=\thisrowno{4}] {\laplace};
+  \addlegendentry{clang + OpenMP}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

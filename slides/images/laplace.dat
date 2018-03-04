@@ -1,0 +1,19 @@
+# Jacobi solver, matrix 7500 x 7500
+# rustc 1.21.0
+# rustflags = ["-C", "target-cpu=native"]
+# Intel(R) Xeon(R) CPU E5-2650 v3 @ 2.30GHz
+#
+# gcc -o bench bench.c -std=c99 -fopenmp -O3 -mtune=native -lm
+# OMP_NUM_THREADS=X numactl --physcpubind=+1-X ./bench -i 1000 -a 2 -r 7500
+#
+# sequential code
+# Rust with chk: 169.7
+# Rust without chk: 101.5
+#
+# number	Rust		Rust		gcc			clang		clang		Rust wo Rayon	Rust wo Rayon	Rust w Pool		Rust w Pool
+# of cores	with chk	without chk	+ avx2		+ avx2		task loop	with ckk		without chk		with chk		without chk
+1		241.0		163.2			124.0		122.3		147.7		168.0			101.6			170.2			101.8
+2		121.3		82.5			58.3		57.3		71.9		84.6			53.6			87.4			55.0
+4		61.6 		43.9			35.7		35.5		41.6		45.5			34.3			45.9			34.9
+8		32.9		28.7			27.5		27.3		28.6		29.9			27.6			30.2			27.9
+10		28.9		26.9			27.0		23.7		61.7		83.7			69.2			30.6			29.0
