@@ -91,6 +91,8 @@ image::images/rust.png[width=150]
 
 [NOTE.speaker]
 --
+Performance: Keinen Grund wieso es langsamer als C sein sollte
+Link zu Computer Language Benchmarks Game
 --
 
 === Safety vs Speed
@@ -100,6 +102,7 @@ image:images/comparsion.png[jhh, width=600]
 
 [NOTE.speaker]
 --
+Die Sicht auf sich selbst. Allgemein natürlich schwierig.
 --
 
 === Einfache Integration von C
@@ -145,7 +148,8 @@ std::cout << (*x)[0] << std::endl;
 
 [NOTE.speaker]
 --
-In der Realität verteilt über viele Files + if das wieder was in den Vector pushed.
+z wird am Ende vom Scope zerstört
+In der Realität verteilt über viele Files
 --
 
 * Ist dieses C++-Beispiel problematisch?
@@ -207,18 +211,27 @@ error[E0597]: `z` does not live long enough
 .Sind die geschweiften Klammern nötig?
 [source, Rust]
 ----
-let mut v = vec!("Hello para//el 2018!");
+let mut x = vec!("Hello para//el 2018!");
 
 {
-	let x = &mut v;
-	// Do something with x...
+	let z = &mut x;
+	// Do something with z...
 }
 
-println!("{}", v[0]);
+println!("{}", x[0]);
 ----
 
 [NOTE.speaker]
 --
+Ohne Klammern:
+error[E0502]: cannot borrow `v` as immutable because it is also borrowed as mutable
+  --> src/main.rs:94:20
+   |
+90 |         let x = &mut v;
+   |                      - mutable borrow occurs here
+...
+94 |     println!("{}", v[0]);
+   |                    ^ immutable borrow occurs here
 --
 
 == Ein einfaches Beispiel: Pi
@@ -229,7 +242,7 @@ image::images/pi.png[width=600]
 --
 --
 
-=== Pi-Berechnung in C
+=== Pi-Berechnung in C++
 
 * Für *num_steps* Rechtecke die Höhen bestimmen
 * Höhen Aufsummieren, zum Schluß mit der Breite multiplizieren
@@ -239,14 +252,14 @@ image::images/pi.png[width=600]
 const int num_steps = 100000000;
 
 double sum = 0.0;
-double step = 1.0 / (double)num_steps;
+double step = 1.0 / static_cast<double>(num_steps);
 
-for (int i = 0; i < num_steps; i++) {
+for (int i = 0; i < num_steps; ++i) {
     double x = (i + 0.5) * step;
     sum += 4.0 / (1.0 + x * x);
 }
 
-std::cout << "PI = " <<  sum * step << std::endl;
+std::cout << "Pi = " <<  sum * step << std::endl;
 ----
 
 [NOTE.speaker]
@@ -294,11 +307,11 @@ std::thread t([&](int start, int end){
 
 }, (NUM_STEPS / nthreads) *  tid
  , (NUM_STEPS / nthreads) * (tid + 1));
-
 ----
 
 [NOTE.speaker]
 --
+Im Code schleife über tid und join weggelassen
 --
 
 === Berechnung mit Rust
@@ -350,7 +363,7 @@ help: to force the closure to take ownership of `**step`
    |                  ^^^^^^^
 ----
 
-=> Ein std::thread darf nur auf Variablen zugreifen die er besitzt oder welche _static lifetime_ haben.
+=> Ein std::thread darf nur auf Variablen zugreifen die er besitzt oder welche _static lifetime_ haben
 
 [NOTE.speaker]
 --
@@ -387,7 +400,7 @@ let threads: Vec<_> = (0..nthreads)
 
 * Objekte werden als unveränderliche übergeben
 * Wettlaufsituation wird verhindert
-* Aber keine Lösung für die Pi-Berechnung
+* Keine Lösung für die Pi-Berechnung
 
 [source, Rust]
 ----
@@ -431,7 +444,7 @@ pub fn init() {
 ** Speicherschutz über _reference counting_
 ** `std::{Rc|Arc}<T>` alloziert `T` auf dem Heap
 ** `std::Arc` is thread-sicher
-* _scoped Threads_ aus dem Crossbeam crate ähnlich dem OpenMP Thread Modell
+* _scoped Threads_ aus dem Crossbeam crate (~OpenMP Thread Model) ermöglicht teilen von Stackvariablen
 
 => Bis jetzt aber nur unveränderliche Variablen
 
@@ -441,7 +454,7 @@ pub fn init() {
 
 === Zugriffsschutz mit Mutexen / RWLock
 
-* Rust-Mutexe nehmen zuschützendes Objekt auf
+* Rust-Mutexe nehmen zu schützendes Objekt auf
 * *lock*-Methode liefert Objekt zum Zugriff zurück
 * Automatische Freigabe nach Zerstörung des Objekts
 
@@ -460,6 +473,9 @@ pub fn init() {
 
 [NOTE.speaker]
 --
+fn lock(&self) -> LockResult<MutexGuard<T>>
+* MutexGuard gibt lock zurück
+* LockResult: "vergiftet" mutex, wenn thread zB paniced mit lock. Fehler bei jedem weiterem Zugriff von anderen threads.
 --
 
 === Atomare Variablen
@@ -474,10 +490,11 @@ let reference_count: AtomicUsize = 0;
 reference_count.fetch_add(1, Ordering::Relaxed);
 ----
 
-=> Der trait `std::marker::Sync` muß für gemeinsame veränderliche Variablen implementiert werden
+*Grundsätzlich:* Der trait `std::marker::Sync` muß für gemeinsame veränderliche Variablen implementiert werden
 
 [NOTE.speaker]
 --
+T is Sync if &T is Send: if there is no possibility of undefined behavior (including data races) when passing &T references between threads.
 --
 
 == Parallele Berechnung
@@ -490,8 +507,8 @@ let threads: Vec<_> = (0..nthreads).map(|tid| {
     let sum = sum.clone();
 
     thread::spawn(move || {
-        let start = (NUM_STEPS / nthreads) * tid;
-        let end = (NUM_STEPS / nthreads) * (tid+1);
+        let start = (NUM_STEPS / nthreads) *  tid;
+        let end =   (NUM_STEPS / nthreads) * (tid+1);
         for i in start..end {
             let x = (i as f64 + 0.5) * step;
             *sum.lock().unwrap() += 4.0 / (1.0 + x * x);
@@ -518,8 +535,6 @@ let threads: Vec<_> = (0..nthreads)
 	.map(|tid| {
 		thread::spawn(move || {
 			let mut partial_sum = 0 as f64;
-			let start = (NUM_STEPS/nthreads)*tid;
-			let end = (NUM_STEPS/nthreads)*(tid+1);
 			for i  in start..end {
 				let x = (i as f64 + 0.5) * step;
 				partial_sum += 4.0 / (1.0 + x * x);
@@ -530,12 +545,13 @@ let threads: Vec<_> = (0..nthreads)
 
 [NOTE.speaker]
 --
+hier nur Berechnung
+im code start/end weggelassen
 --
 
-=== Berechnung mit Teilergebnissen
+=== Zusammenführen der Teilergebnisse
 
-* Der Mutex serialisiert die Berechnung
-* Idee: Teilergebnisse berechnen & zusammenführen
+* Ergenmosse der Threads stehen beim `join` zur Verfügung
 
 [source, Rust]
 ----
@@ -615,6 +631,7 @@ for _ in 0..nthreads {
 
 [NOTE.speaker]
 --
+Pi hat natürlich kein Problem mit Lastbalanzierung.
 --
 
 == Rayon: Parallelism in Rust
@@ -673,7 +690,6 @@ println!("Pi: {}", sum * (1.0 / NUM_STEPS as f64));
 
 [NOTE.speaker]
 --
-Actually things aren't that bad
 --
 
 == Das Laplace-Problem
@@ -683,13 +699,27 @@ Actually things aren't that bad
 
 image::images/laplace.png[width=600]
 
+[NOTE.speaker]
+--
+--
+
 === Lösung mit Hilfe von Tasks
 
 image::images/laplace_task.png[width=600]
 
+[NOTE.speaker]
+--
+Gemessen auf Intel Haswell EP mit 10 Kernen
+--
+
 === Lösung durch eine // For-Schleife
 
 image::images/laplace_for.png[width=600]
+
+[NOTE.speaker]
+--
+Sprung bei 10 Threads verschwindet mit Threadpool
+--
 
 // == Weitere Hinweise
 //
