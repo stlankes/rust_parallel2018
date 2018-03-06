@@ -30,6 +30,11 @@
 * Playground: https://play.rust-lang.org
 * Tutorial: https://rustbyexample.com
 
+[NOTE.speaker]
+--
+* wechsel zu Jens
+--
+
 [source, bash]
 ----
 curl https://sh.rustup.rs -sSf | sh
@@ -148,8 +153,9 @@ std::cout << (*x)[0] << std::endl;
 
 [NOTE.speaker]
 --
-z wird am Ende vom Scope zerstört
-In der Realität verteilt über viele Files
+* wechsel zu Stefan
+* z wird am Ende vom Scope zerstört
+* In der Realität verteilt über viele Files
 --
 
 * Ist dieses C++-Beispiel problematisch?
@@ -311,6 +317,7 @@ std::thread t([&](int start, int end){
 
 [NOTE.speaker]
 --
+wechsel Jens
 Im Code schleife über tid und join weggelassen
 --
 
@@ -436,20 +443,7 @@ pub fn init() {
 
 [NOTE.speaker]
 --
---
-
-=== Gemeinsame Variablen
-
-* Heap-Allokation ermöglicht längere Lebenszeit
-** Speicherschutz über _reference counting_
-** `std::{Rc|Arc}<T>` alloziert `T` auf dem Heap
-** `std::Arc` is thread-sicher
-* _scoped Threads_ aus dem Crossbeam crate (~OpenMP Thread Model) ermöglicht teilen von Stackvariablen
-
-=> Bis jetzt aber nur unveränderliche Variablen
-
-[NOTE.speaker]
---
+wechsel Stefan
 --
 
 === Zugriffsschutz mit Mutexen / RWLock
@@ -476,6 +470,20 @@ pub fn init() {
 fn lock(&self) -> LockResult<MutexGuard<T>>
 * MutexGuard gibt lock zurück
 * LockResult: "vergiftet" mutex, wenn thread zB paniced mit lock. Fehler bei jedem weiterem Zugriff von anderen threads.
+--
+
+=== Gemeinsame Variablen
+
+* Heap-Allokation ermöglicht längere Lebenszeit
+** Speicherschutz über _reference counting_
+** `std::{Rc|Arc}<T>` alloziert `T` auf dem Heap
+** `std::Arc` is thread-sicher
+* _scoped Threads_ aus dem Crossbeam crate (~OpenMP Thread Model) ermöglicht teilen von Stackvariablen
+
+=> Bis jetzt aber nur unveränderliche Variablen
+
+[NOTE.speaker]
+--
 --
 
 === Atomare Variablen
@@ -519,6 +527,7 @@ let threads: Vec<_> = (0..nthreads).map(|tid| {
 
 [NOTE.speaker]
 --
+wechsel zu Jens
 --
 
 === Berechnung mit Teilergebnissen
@@ -701,6 +710,7 @@ image::images/laplace.png[width=600]
 
 [NOTE.speaker]
 --
+wechsel zu Stefan
 --
 
 === Lösung mit Hilfe von Tasks
