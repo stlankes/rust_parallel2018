@@ -62,6 +62,7 @@ Bekannt u.a. für den Einsatz in Firefox
 [NOTE.speaker]
 --
 Frage ans Publikum:
+
 * Wer kennt Rust?
 * Wer hat schonmal Code in Rust geschrieben?
 * Wessen Code hat auch compiliert?
@@ -97,6 +98,7 @@ image::images/rust.png[width=150]
 [NOTE.speaker]
 --
 Performance: Keinen Grund wieso es langsamer als C sein sollte
+
 Link zu Computer Language Benchmarks Game
 --
 
@@ -560,7 +562,7 @@ im code start/end weggelassen
 
 === Zusammenführen der Teilergebnisse
 
-* Ergenmosse der Threads stehen beim `join` zur Verfügung
+* Ergebnisse der Threads stehen beim `join` zur Verfügung
 
 [source, Rust]
 ----
